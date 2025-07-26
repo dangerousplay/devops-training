@@ -37,36 +37,41 @@ For example: `compile -> test -> package`.
 This is the dedicated worker that executes the jobs in your pipeline.
 The GitLab server manages the workflow (the "what"), but the Runner does the actual heavy lifting (the "how").
 
-![Getting started with GitLab CI/CD](https://www.youtube.com/watch?v=sIegJaLy2ug)
+### Gitlab University Course
 
-> 📚 **Recommended Reading:** [GitLab CI/CD Overview](https://docs.gitlab.com/ci/) (Don't worry about understanding every detail yet. Just absorb the main ideas.)
+Sign up on [Gitlab University](https://university.gitlab.com/) and do the Course [Getting Started with CI/CD](https://university.gitlab.com/learn/course/getting-started-with-cicd/getting-started-with-cicd/gitlab-cicd)
+
+You can **skip** the **Hands-on Lab** from the Course.
 
 -----
 
 ### **Part 2: Getting Your Code into GitLab**
 
-Your GitLab instance is already running. The first step is to make it aware of your project. For this first lesson, we'll push the code you already have on your machine. This gives us a fast and reliable starting point.
+Your GitLab instance is already running. The first step is to make it aware of your project. 
+For this first lesson, we'll push the code you already have on your machine. 
+This gives us a fast and reliable starting point.
 
-1.  **Create Your Project:** In your GitLab instance, create a new blank project. Name it `android-rom-pipeline`.
+1.  **Create Your Project:** 
+In your GitLab instance, create a new blank project.
+Name it `android-rom`.
 
-2.  **Connect Your Local Code:** Open a terminal in the root directory of your Android ROM source code and run the following commands.
+2.  **Connect Your Local Code:** 
+Open a terminal in the root directory of your Android ROM source code and run the following commands.
 
-    ```bash
-    # This command gives a nickname to your GitLab instance's URL.
-    # Replace the URL with the correct SSH address from your project's page.
-    # It will look something like: ssh://git@gitlab.your-company.com:2222/your-group/android-rom-pipeline.git
-    git remote add gitlab ssh://<YOUR_GITLAB_PROJECT_SSH_URL>
+```bash
+# This command gives a nickname to your GitLab instance's URL.
+git remote add origin http://gitlab.local/root/android-rom.git
 
-    # Add all your files to be tracked by Git
-    git add .
+# Add all your files to be tracked by Git
+git add .
 
-    # Create your first "commit" - a snapshot of your code
-    git commit -m "Initial commit of the Android ROM project"
+# Create your first "commit" - a snapshot of your code
+git commit -m "Initial commit of the Android ROM project"
 
-    # Push your code from your machine to the GitLab server!
-    git push -u gitlab main 
-    # (Note: Your default branch might be 'master' instead of 'main')
-    ```
+# Push your code from your machine to the GitLab server!
+git push -u origin main 
+# (Note: Your default branch might be 'master' instead of 'main')
+```
 
 After this, refresh your project page in GitLab. You should see all your files.
 
@@ -78,28 +83,36 @@ Your GitLab project now has the blueprint, but it needs a worker to build it. Le
 
 For this first lesson, we will use the **`shell` executor**.
 
-**A Key Teaching Moment:** The `shell` executor is the simplest type. It runs your pipeline commands directly on the machine where the runner is installed, using the tools and environment already present on that machine. 
+**A Key Teaching Moment:** 
+The `shell` executor is the simplest type. 
+It runs your pipeline commands directly on the machine where the runner is installed, using the tools and environment already present on that machine. 
 This is perfect for our first build because your machine is already set up to compile Android. 
 In a future lesson, we will explore the `docker` executor, which provides a clean, isolated environment for every job, a more advanced and robust approach.
 
 1.  **Find Your Registration Token:**
-In your GitLab project, navigate to **Settings \> CI/CD** and expand the **Runners** section. 
-You will see the GitLab instance URL and a "registration token". Keep this page open.
+In your GitLab project, navigate to **Settings > CI/CD** and expand the **Runners** section.
+You will see the GitLab instance URL and a "registration token" when clicking on the 3 dots (...). 
+Keep this page open.
 
 2.  **Start the Registration Process:** 
 On the machine where you will run the builds (likely your own powerful development machine), open a terminal and run the `gitlab-runner register` command.
 
-> 📚 **Documentation Reference:** [Registering a Runner](https://docs.gitlab.com/runner/register/)
-
-3.  **The Interactive Dialogue:**
+3. **The Interactive Dialogue:**
 The command will start a conversation. Here’s how to answer:
 - **Enter the GitLab instance URL:** Copy it from the GitLab UI.
 - **Enter the registration token:** Copy the token. It's sensitive, so handle it with care.
-- **Enter a description for the runner:** `My Android Build Machine`
-- **Enter tags for the runner:** This is critical. Enter `shell,android-build`. Tags are labels that allow us to direct specific jobs to specific, capable runners.
+- **Enter a description for the runner:** `Android Build Machine`
+- **Enter tags for the runner:** This is critical. Enter `android-build`. Tags are labels that allow us to direct specific jobs to specific, capable runners.
 - **Enter the executor:** `shell`
 
+> 📚 **Documentation Reference:** [Registering a Runner](https://docs.gitlab.com/runner/register/)
+
 Your runner is now registered and waiting for jobs! You can confirm this by refreshing the Runners page in GitLab.
+
+You can run the Gitlab runner as non root user by using:
+```shell
+gitlab-runner run
+```
 
 > 📚 **Recommended Reading:** [GitLab Runner Executors](https://docs.gitlab.com/runner/executors/) (Focus on understanding the difference between `shell` and `docker`).
 
@@ -107,9 +120,21 @@ Your runner is now registered and waiting for jobs! You can confirm this by refr
 
 ### **Part 4: The Core Challenge - Your First Pipeline**
 
-This is the most important part of your journey today. Your challenge is to create a `.gitlab-ci.yml` file that tells your new runner how to compile your Android ROM.
+This is the most important part of your journey today. 
+Your challenge is to create a `.gitlab-ci.yml` file that tells your new runner how to compile your Android ROM.
 
-**Your Goal:** 
+You can check examples of Gitlab CI to get inspirations:
+
+| Gitlab CI                                                                                                                                     |
+|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [Gradle](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml)                                     |
+| [Spring Cloud Front Deploy Demo](https://gitlab.com/gitlab-examples/spring-gitlab-cf-deploy-demo/-/blob/master/.gitlab-ci.yml?ref_type=heads) |
+
+
+> 📚 **Your Most Important Resource:** [`.gitlab-ci.yml` Keyword Reference](https://docs.gitlab.com/ci/yaml/)) (Bookmark this page. You will use it constantly.)
+
+#### Your Goal:
+
 Create a file named `.gitlab-ci.yml` in the root of your project. 
 This file should define a pipeline that is automatically triggered when you `push` a change. 
 The pipeline should execute the build command for your ROM.
@@ -124,45 +149,45 @@ The logs generated by a failed job are your most valuable learning tool.
 Begin with the simplest possible pipeline to confirm everything is connected. 
 This file tells GitLab to run a job named `build_rom_job` during the `build` stage.
 
-  ```yaml
-  # .gitlab-ci.yml
+```yaml
+# .gitlab-ci.yml
 
-  stages:
-    - build
+stages:
+- build
 
-  build_rom_job:
-    stage: build
-    tags: # This is CRITICAL. It tells GitLab to use the runner we just made.
-      - shell
-      - android-build
-    script:
-      - echo "Pipeline started! Preparing to build..."
-      - echo "I am running as user: $(whoami)"
-      - echo "I am in directory: $(pwd)"
-      - ls -la # List files to confirm the source code is here.
-      #
-      # --- YOUR REAL BUILD COMMAND GOES HERE ---
-      # Example:
-      # - source build/envsetup.sh
-      # - lunch your_device-userdebug
-      # - make -j$(nproc)
-  ```
+build_rom_job:
+stage: build
+tags: # This is CRITICAL. It tells GitLab to use the runner we just made.
+  - shell
+  - android-build
+script:
+  - echo "Pipeline started! Preparing to build..."
+  - echo "I am running as user: $(whoami)"
+  - echo "I am in directory: $(pwd)"
+  - ls -la # List files to confirm the source code is here.
+  #
+  # --- YOUR REAL BUILD COMMAND GOES HERE ---
+  # Example:
+  # - source build/envsetup.sh
+  # - lunch your_device-userdebug
+  # - make -j$(nproc)
+```
 
-* **"Command not found" error:** 
-* Since we are using the `shell` executor, this error means the command is not available in the environment of the user running the `gitlab-runner` process. 
-* Make sure all your Android build environment variables (`PATH`, `JAVA_HOME`, etc.) are correctly set for that user on the machine.
+#### **"Command not found" error:** 
+Since we are using the `shell` executor, this error means the command is not available in the environment of the user running the `gitlab-runner` process. 
+Make sure all your Android build environment variables (`PATH`, `JAVA_HOME`, etc.) are correctly set for that user on the machine.
 
-* **How do I trigger the pipeline?** 
+#### **How do I trigger the pipeline?**
 Simply `commit` and `push` your new `.gitlab-ci.yml` file to your GitLab project. 
-* Then, go to the **CI/CD > Pipelines** section in the GitLab UI to watch it run in real-time.
+Then, go to the **CI/CD > Pipelines** section in the GitLab UI to watch it run in real-time.
 
-> 📚 **Your Most Important Resource:** [`.gitlab-ci.yml` Keyword Reference](https://www.google.com/search?q=%5Bhttps://docs.gitlab.com/ee/ci/yaml/index.html%5D\(https://docs.gitlab.com/ee/ci/yaml/index.html\)) (Bookmark this page. You will use it constantly.)
 
 -----
 
 ### **Extra Challenge (Once your first build runs)**
 
-* **Organize Your Workflow:** 
+#### **Organize Your Workflow:**
+
 Create a second `stage` called `setup` that runs *before* the `build` stage. 
 In this new stage, create a job that runs setup scripts or prints out the versions of the tools being used (e.g., `java -version`, `gcc --version`).
 
