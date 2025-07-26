@@ -4,7 +4,7 @@ installCertmanager: false
 certmanager-issuer:
    # The email address to register certificates requested from Let's Encrypt.
    # Required if using Let's Encrypt.
-   email: email@example.com
+   email: email@local
 
 nginx-ingress:
   enabled: false
@@ -12,27 +12,27 @@ nginx-ingress:
 global:
   edition: ce
   hosts:
-    domain: example.com
+    domain: local
     hostSuffix: staging
     https: false
     externalIP:
     gitlab:
-      name: gitlab.example.com
+      name: gitlab.local
       https: false
     registry:
-      name: registry.example.com
+      name: registry.local
       https: false
     minio:
-      name: minio.example.com
+      name: minio.local
       https: false
     smartcard:
-      name: smartcard.example.com
+      name: smartcard.local
     kas:
-      name: kas.example.com
+      name: kas.local
     pages:
-      name: pages.example.com
+      name: pages.local
       https: false
-    ssh: gitlab.example.com
+    ssh: gitlab.local
   ingress:
     enabled: false
     tls:

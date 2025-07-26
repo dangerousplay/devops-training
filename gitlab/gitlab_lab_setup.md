@@ -42,10 +42,15 @@ In few minutes the pods should be `running`.
 
 Execute kubectl `port-forward` to create access Gitlab from your machine:
 ```shell
-kubectl port-forward svc/my-gitlab-webservice-default 8181:8181
+sudo kubectl --kubeconfig="$HOME/.kube/config" port-forward svc/my-gitlab-webservice-default 80:8181
 ```
 
-You can access Gitlab on http://localhost:8181 using a Browser
+Add `gitlab.local` as 127.0.0.1 to `/etc/hosts`:
+```shell
+echo "127.0.0.1 gitlab.local" >> /etc/hosts
+```
+
+You can access Gitlab on http://gitlab.local:80 using a Browser
 
 Run the following command to get the user `root` password to login on Gitlab.
 ```shell
@@ -58,7 +63,7 @@ Login on Gitlab using the `root` user.
 
 You can also `port-forward` the Gitlab Shell port to use Git SSH:
 ```shell
-kubectl port-forward svc/my-gitlab-gitlab-shell 22:22
+sudo kubectl --kubeconfig="$HOME/.kube/config" port-forward svc/my-gitlab-gitlab-shell 22:22
 ```
 
 ## Cleanup
