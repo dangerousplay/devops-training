@@ -1,0 +1,39 @@
+installCertmanager: false
+
+# Settings for the Let's Encrypt ACME Issuer
+certmanager-issuer:
+   # The email address to register certificates requested from Let's Encrypt.
+   # Required if using Let's Encrypt.
+   email: email@example.com
+
+nginx-ingress:
+  enabled: false
+
+global:
+  edition: ce
+  hosts:
+    domain: example.com
+    hostSuffix: staging
+    https: false
+    externalIP:
+    gitlab:
+      name: gitlab.example.com
+      https: false
+    registry:
+      name: registry.example.com
+      https: false
+    minio:
+      name: minio.example.com
+      https: false
+    smartcard:
+      name: smartcard.example.com
+    kas:
+      name: kas.example.com
+    pages:
+      name: pages.example.com
+      https: false
+    ssh: gitlab.example.com
+  ingress:
+    enabled: false
+    tls:
+      enabled: false
