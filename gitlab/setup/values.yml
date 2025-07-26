@@ -6,6 +6,9 @@ certmanager-issuer:
    # Required if using Let's Encrypt.
    email: email@local
 
+gitlab-runner:
+  install: false
+
 nginx-ingress:
   enabled: false
 
