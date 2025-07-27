@@ -2,9 +2,10 @@
 
 ## Requirements
 
-- Kind (Create local kubernetes cluster)
-- Kubectl (Interact with Kubernetes)
-- Helm (Install Gitlab on Kubernetes)
+- Kind (To create local kubernetes cluster)
+- Docker (To run containers)
+- Kubectl (To interact with Kubernetes)
+- Helm (To install Gitlab on Kubernetes)
 
 Follow the [Gitlab Setup guide](./gitlab_lab_setup.md) to run Gitlab locally
 
