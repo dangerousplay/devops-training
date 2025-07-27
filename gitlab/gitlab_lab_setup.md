@@ -9,7 +9,7 @@
 
 On Arch Linux:
 ```shell
-paru -S helm kind kubectl docker
+paru -S helm kind-bin kubectl docker
 ```
 
 ## Setup
