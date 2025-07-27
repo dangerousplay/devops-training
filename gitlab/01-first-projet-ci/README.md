@@ -13,9 +13,11 @@ By the end of this session, you will be able to:
 
 ### **Part 1: The Philosophy - Why We Automate**
 
-Imagine building a car. You wouldn't assemble the entire vehicle and only then check if the engine starts or the brakes work. You test each component as it's installed.
+Imagine building a car. You wouldn't assemble the entire vehicle and only then check if the engine starts or the brakes work. 
+You test each component as it's installed.
 
-In software, it's the same principle. The philosophy behind GitLab is to provide a single, unified platform for the entire software development lifecycle.
+In software, it's the same principle. 
+The philosophy behind GitLab is to provide a single, unified platform for the entire software development lifecycle.
 
 **Key Concepts (Your New Vocabulary):**
 

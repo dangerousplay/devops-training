@@ -40,7 +40,7 @@ kubectl get pods
 
 In few minutes the pods should be `running`.
 
-Execute kubectl `port-forward` to create access Gitlab from your machine:
+Execute kubectl `port-forward` to access Gitlab from your machine:
 ```shell
 sudo kubectl --kubeconfig="$HOME/.kube/config" port-forward svc/my-gitlab-webservice-default 80:8181
 ```
