@@ -20,7 +20,7 @@ You can upgrade and rollback versions easily using it.
 
 Create the Kubernetes cluster using `Kind`:
 ```shell
-kind create
+kind create cluster
 ```
 
 Add the `Gitlab` Helm chart repository:
@@ -70,7 +70,7 @@ sudo kubectl --kubeconfig="$HOME/.kube/config" port-forward svc/my-gitlab-gitlab
 
 Remove the Kubernetes cluster:
 ```shell
-kind delete
+kind delete cluster
 ```
 
 ## Further reading
