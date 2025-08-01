@@ -14,4 +14,5 @@ Follow the [Gitlab Setup guide](./gitlab_lab_setup.md) to run Gitlab locally
 - [1 - From Code to First Build](./01-first-projet-ci/README.md). Creating your first project and Gitlab CI pipeline.
 - [2 - Building with Speed and Intelligence](./02_build_cache.md)
 - [3 - Pipeline Flow with `needs` and `artifacts`](./03_artifacts_needs.md)
+- [4 - Building Native Images with Docker and GraalVM](./04_build_docker.md)
 
