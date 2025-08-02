@@ -4,4 +4,10 @@ Devops training courses, labs, resources to become a great engineer and construc
 
 ## Trainings
 
-[Gitlab management and CI/CD expert](./gitlab)
+- [Gitlab management and CI/CD expert](./gitlab)
+- [Hashicorp Vault](./vault)
+- [Ansible](./ansible)
+
+## Projects
+
+- [Cookiebot CI/CD](./projects/cookiebot-ci-cd/README.md)
