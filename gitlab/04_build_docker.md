@@ -93,5 +93,9 @@ Click on it and watch the log. You'll see GitLab pulling the `ghcr.io/graalvm/na
 4.  Once complete, **download the artifact** and inspect it. 
 You'll have a native executable file ready for deployment!
 
+### Extra challenge
+
+Create a docker image with the native image executable to run Cookiebot
+
 This process demonstrates the true power of the Docker executor: the ability to pull a highly specialized environment from a public registry, perform a complex build, and then discard the environment, leaving no trace behind. 
 This is the foundation of modern, scalable CI/CD.
