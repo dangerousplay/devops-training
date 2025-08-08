@@ -19,6 +19,8 @@ By the end of this lesson, you will have a solid understanding of Vault's core p
 
 ### **1. Starting the Vault Dev Server**
 
+Install hashicorp vault on your machine by following the [Vault Install official page](https://developer.hashicorp.com/vault/install)
+
 A "dev" server is a special mode for Vault that runs entirely in-memory. 
 It's perfect for learning and testing because it starts up quickly and doesn't require complex setup. 
 **It should never be used for production.**
@@ -31,6 +33,8 @@ It's perfect for learning and testing because it starts up quickly and doesn't r
 2.  Vault will start and print out a lot of information. Look for two critical pieces of information and save them in a temporary text file:
     * **Unseal Key:** Not needed for dev mode, but crucial for production.
     * **Root Token:** This is the master key to your Vault. It has permission to do *anything*.
+
+> 📚 For more information about dev mode: ["Dev" server mode](https://developer.hashicorp.com/vault/docs/concepts/dev-server)
 
 -----
 
