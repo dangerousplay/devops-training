@@ -278,3 +278,208 @@ This policy uses a combination of `allow` and `deny` rules on the `sys/policies/
     ```
 
 > **❓ Question:** Why is it a critical security practice to pair broad `allow` rules (like `sys/policies/acl/*`) with specific `deny` rules when creating administrative roles? 
+
+-----
+
+### **A Note on KV Secrets Engines: Version 1 vs. Version 2**
+
+Throughout these exercises, you will see references to `secret/data/...` in the policy paths. This is a crucial detail related to the **version** of the Key-Value (KV) secrets engine being used.
+
+- **KV Version 2 (KV v2):** This is the **default** version enabled when you run `vault server -dev`. It is a **versioned** key-value store, meaning it keeps a history of previous versions of your secrets. Because of this versioning feature, the API paths are segmented.
+    - To access the secret data itself, you must use the `secret/data/...` path in your policy.
+    - To perform operations on the secret's metadata (like listing versions or deleting the secret entirely), you use the `secret/metadata/...` path.
+
+- **KV Version 1 (KV v1):** This is the original, **unversioned** key-value store. It is simpler: when you write a new secret to a path, it overwrites the previous one.
+    - Policy paths correspond directly to the mount path, like `kv/my-secret`. There is no `data/` or `metadata/` infix required.
+
+The `vault kv ...` commands intelligently interact with the correct API endpoint based on the version of the engine at the target path.
+The following exercises will show you how to work with a KV v1 engine.
+
+-----
+
+#### **Exercise 9: Enabling and Authoring for KV Version 1**
+
+**Objective:** Enable a KV v1 secrets engine and write a policy for it, noting the difference in the policy path structure.
+
+**Scenario:** A legacy application requires a non-versioned key-value store. 
+We will enable a KV v1 engine at the path `kv-legacy/` and create a policy that grants full access to it.
+
+1.  **Action:** Switch back to your **root token**.
+2.  **Command:** First, enable the KV v1 secrets engine at a new path.
+    ```shell
+    vault secrets enable -path=kv-legacy -version=1 kv
+    ```
+3.  **Action:** Create a policy file named `legacy-app-policy.hcl`. Note the simple path structure without `data/`.
+    ```hcl
+    # Grant full capabilities to the legacy KV store
+    path "kv-legacy/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    ```
+4.  **Command:** Write the policy and create a token with it.
+    ```shell
+    vault policy write legacy-app legacy-app-policy.hcl
+    vault token create -policy="legacy-app"
+    ```
+5.  **Action:** Export the new token as your `VAULT_TOKEN`.
+6.  **Action:** Test your access to the KV v1 store.
+7.  **Command (Should Succeed):**
+    ```shell
+    vault kv put kv-legacy/config/database-url value="127.0.0.1"
+    vault kv get kv-legacy/config/database-url
+    vault kv list kv-legacy/config/
+    ```
+8.  **Command (Should Fail):** Try to access the default KV v2 store.
+    ```shell
+    vault kv get secret/test
+    ```
+
+> **❓ Question:** Look at the `path` in `legacy-app-policy.hcl`. Why is `data/` not required in this path, unlike the policies for the `secret/` path used in earlier exercises?
+
+-----
+
+#### **Exercise 10: KV v1 `list` Permissions**
+
+**Objective:** Understand how the `list` capability functions in a KV v1 policy.
+
+**Scenario:** An automated script needs to discover all secrets under a specific prefix in the `kv-legacy` store, but it must not be allowed to read the secret values themselves.
+
+1.  **Action:** Switch back to your **root token**.
+2.  **Action:** Make sure there are a few secrets to find in the `kv-legacy` store.
+    ```shell
+    # (Use Root Token)
+    vault kv put kv-legacy/inventory/server-01 ip=10.0.0.1
+    vault kv put kv-legacy/inventory/server-02 ip=10.0.0.2
+    ```
+3.  **Action:** Create a new policy file named `kv-lister-policy.hcl`. This policy only grants the `list` capability.
+    ```hcl
+    # Grant only list capability to the inventory path
+    path "kv-legacy/inventory/*" {
+      capabilities = ["list"]
+    }
+    ```
+4.  **Command:** Write the policy to Vault and create a token for it.
+    ```shell
+    vault policy write kv-lister kv-lister-policy.hcl
+    vault token create -policy="kv-lister"
+    ```
+5.  **Action:** Export the new token as your `VAULT_TOKEN`.
+6.  **Command (Should Succeed):** Try to list the secrets. Note that listing a "folder" in KV requires the `list` command on that path itself.
+    ```shell
+    vault kv list kv-legacy/inventory/
+    ```
+7.  **Command (Should Fail):** Now, try to read one of the secrets you just discovered.
+    ```shell
+    vault kv get kv-legacy/inventory/server-01
+    ```
+
+> **❓ Question:** In KV v2, a `list` operation requires permissions on the `secret/metadata/...` path. How does the `list` permission in this KV v1 policy differ, and why is this an important distinction to remember when working with both versions?
+
+-----
+
+#### **Exercise 11: The Destructive Nature of KV v1 (Overwrite)**
+
+**Objective:** Witness firsthand that KV v1 does not version secrets and an `update` overwrites data permanently.
+
+**Scenario:** An operator needs to update an API key stored in the `kv-legacy` engine. We will observe how the old value is immediately and permanently replaced.
+
+1.  **Action:** Switch to your **root token**.
+2.  **Command:** Create an initial secret to work with.
+    ```shell
+    vault kv put kv-legacy/api/billing-service key="v1_initial_key_12345"
+    ```
+3.  **Action:** Create a policy `kv-updater-policy.hcl` that allows writing. The `vault kv put` command requires `create` for new paths and `update` for existing paths.
+    ```hcl
+    path "kv-legacy/api/*" {
+      capabilities = ["read", "create", "update"]
+    }
+    ```
+4.  **Command:** Write this policy and create a token with it. Export the new token.
+    ```shell
+    vault policy write kv-updater kv-updater-policy.hcl
+    vault token create -policy="kv-updater"
+    ```
+5.  **Command (Read):** First, read the secret to see the original value.
+    ```shell
+    vault kv get kv-legacy/api/billing-service
+    ```
+6.  **Command (Update):** Now, `put` a new value in the same path.
+    ```shell
+    vault kv put kv-legacy/api/billing-service key="v2_updated_key_ABCDE"
+    ```
+7.  **Command (Confirm):** Read the secret again. You will see the new value. With KV v1, the old value is gone forever.
+    ```shell
+    vault kv get kv-legacy/api/billing-service
+    ```
+
+> **❓ Question:** If this had been a KV v2 secrets engine, how would the outcome of step 6 have been different? What command could you have used to retrieve the original key ("v1_initial_key_12345")?
+
+-----
+
+#### **Exercise 12: Separating `create` and `update` Capabilities in KV v1**
+
+**Objective:** Implement a "write-once" policy by differentiating between the `create` and `update` capabilities.
+
+**Scenario:** We need to provision initial credentials for new applications. The provisioning process should be able to write a secret once, but it should not be allowed to modify it later.
+
+1.  **Action:** Switch to your **root token**.
+2.  **Action:** Create a policy file `write-once-policy.hcl`. This policy *only* includes the `create` capability.
+    ```hcl
+    # Allow creating, but not updating, secrets in the app-init path
+    path "kv-legacy/app-init/*" {
+      capabilities = ["create", "read"]
+    }
+    ```
+3.  **Command:** Write the policy and create a token. Export the new token.
+    ```shell
+    vault policy write write-once kv-once-policy.hcl
+    vault token create -policy="write-once"
+    ```
+4.  **Command (Should Succeed):** Use your new token to write a secret to a brand new path. This works because the path doesn't exist yet, so the action is a `create`.
+    ```shell
+    vault kv put kv-legacy/app-init/new-app-123 token="initial-bootstrap-token"
+    ```
+5.  **Command (Should Fail):** Now, immediately try to write to that *same path* again. This fails because the path now exists, and your policy does not grant the `update` capability.
+    ```shell
+    vault kv put kv-legacy/app-init/new-app-123 token="trying-to-change-token"
+    ```
+
+> **❓ Question:** Describe a security scenario where a "write-once" policy like this would be highly valuable for preventing accidental or malicious changes.
+
+-----
+
+#### **Exercise 13: Granular Control with the `+` Wildcard in KV v1**
+
+**Objective:** Use the `+` wildcard to scope permissions to a specific level in a path hierarchy.
+
+**Scenario:** We have a KV v1 store for infrastructure secrets. A "network-admin" role should be allowed to manage secrets for different environments (e.g., `prod`, `dev`) inside the `networking` folder, but they must not be able to manage secrets in sub-folders (like `networking/prod/internal`) or in other top-level folders (like `compute`).
+
+1.  **Action:** Switch to your **root token** and create some placeholder secrets.
+    ```shell
+    # (Use Root Token)
+    vault kv put kv-legacy/networking/prod/firewall-rules value="..."
+    vault kv put kv-legacy/networking/dev/switch-config value="..."
+    vault kv put kv-legacy/networking/prod/internal/vpn-key value="..."
+    vault kv put kv-legacy/compute/prod/instance-key value="..."
+    ```
+2.  **Action:** Create `network-admin-policy.hcl`. The `+` wildcard in the path will match any single path segment (like `prod` or `dev`) but not multiple segments (like `prod/internal`).
+    ```hcl
+    # Allow managing secrets in the immediate sub-folders of 'networking'
+    path "kv-legacy/networking/+/+" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    ```
+3.  **Command:** Write the policy and create a token. Export the new token.
+4.  **Action:** Test your permissions with the `network-admin` token.
+5.  **Command (Should Succeed):** You can read and write to paths directly under `networking/<env>/`.
+    ```shell
+    vault kv get kv-legacy/networking/prod/firewall-rules
+    vault kv put kv-legacy/networking/staging/new-config value="new"
+    ```
+6.  **Command (Should Fail):** You cannot access deeper paths or paths outside of `networking`.
+    ```shell
+    vault kv get kv-legacy/networking/prod/internal/vpn-key
+    vault kv get kv-legacy/compute/prod/instance-key
+    ```
+
+> **❓ Question:** How would the behavior of this policy change if you replaced `kv-legacy/networking/+/+` with `kv-legacy/networking/*`? Which paths that previously failed would now succeed?
