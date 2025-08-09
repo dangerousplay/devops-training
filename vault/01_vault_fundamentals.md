@@ -52,7 +52,7 @@ We'll set these as environment variables.
     ```
 3.  Set the token. Copy the **Root Token** from the previous step and use it here:
     ```shell
-    export VAULT_TOKEN='s.xxxxxxxxxxxxxxxxxxxx'
+    export VAULT_TOKEN='hvs.xxxxxxxxxxxxxxxxxxxx'
     ```
 4.  Verify your connection:
     ```shell
@@ -101,7 +101,7 @@ We define these permissions in a **policy**.
     *(Note: We use `secret/data/...` because the KVv2 engine versions the secrets and stores the data under this sub-path).*
 3.  Upload this policy to Vault:
     ```shell
-    vault policy write cookiebot-app-policy @cookiebot-app-policy.hcl
+    vault policy write cookiebot-app-policy cookiebot-app-policy.hcl
     ```
 
 > 📚 **Documentation:** [Vault Policies](https://www.google.com/search?q=https://developer.hashicorp.com/vault/concepts/policies)
